@@ -17,7 +17,7 @@ library(ggridges)
 
 ```{r setup, CACHE=TRUE}
 library(rnoaa)
-eather_df = 
+weather_df = 
   rnoaa::meteo_pull_monitors(c("USW00094728", "USC00519397", "USS0023B17S"),
                       var = c("PRCP", "TMIN", "TMAX"), 
                       date_min = "2017-01-01",
@@ -29,5 +29,193 @@ eather_df =
     tmin = tmin / 10,
     tmax = tmax / 10) %>%
   select(name, id, everything())
+weather_df
+```
+
+## Start a plot 
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax))
+```
+
+Scatteplot 
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point()
+```
+
+```{r}
+weather_df %>% 
+  filter(name == "CentralPark_NY") %>% 
+  ggplot(aes(x = tmin, y = tmax)) + 
+  geom_point()
+```
+
+
+## In class
+```{r}
+weather_sp = 
+  ggplot(weather_df,es(x = tmin, y = tmax)) + 
+  geom_point()
+```
+
+
+## Board 
+```{r}
+plot_weather = 
+  weather_df %>%
+  ggplot(aes(x = tmin, y = tmax)) 
+
+plot_weather + geom_point()
+
+```
+
+## More Plot Options 
+Add an aesthetic 
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name))
+```
+
+Add a geom
+```{r}
+
+##Adds a smooth line through your data points, adding se 
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) +
+  geom_smooth(se = FALSE)
+```
+
+
+```{r}
+## makes it a little easier to see by changing the alpha from .5 to .4 
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .4) +
+  geom_smooth(se = FALSE)
+```
+
+```{r}
+##Aethetics map is for creating a smooth through each color 
+ggplot(weather_df, aes(x = tmin, y = tmax, color = name)) + 
+  geom_point(alpha = .4) +
+  geom_smooth(se = FALSE)
+```
+
+Facetting...
+```{r}
+## Divide your plot against a nother vairable 
+ggplot(weather_df, aes(x = tmin, y = tmax, color = name)) + 
+  geom_point(alpha = .4) +
+  geom_smooth(se = FALSE) + 
+  facet_grid( ~ name)
+```
+
+A more interesting plot
+```{r}
+## Boring one...
+ggplot(weather_df, aes(x = date, y = tmax)) + 
+  geom_point()
+
+## Adding color
+ggplot(weather_df, aes(x = date, y = tmax, color = name)) + 
+  geom_point()
+
+## Smooth, often not enough data to show and would not use 
+ggplot(weather_df, aes(x = date, y = tmax, color = name)) + 
+  geom_smooth(se = FALSE) 
+
+## Hexagon
+ggplot(weather_df, aes(x = tmax, y = tmin)) + 
+  geom_hex()
+```
+
+```{r}
+## Allows you to do it by adding precipitation(?)
+ggplot(weather_df, aes(x = date, y = tmax, color = name, size = prcp)) + 
+  geom_point() + 
+  geom_smooth(se = FALSE) + 
+  facet_grid(~name)
+```
+
+
+## Learning Assessment 
+```{r}
+## Color is set to be blue outside of the aesthetic
+ggplot(weather_df) + geom_point(aes(x = tmax, y = tmin), color = "blue")
+
+## ggplot is looking for a variable that is blue and will color whichever 
+ggplot(weather_df) + geom_point(aes(x = tmax, y = tmin, color = "blue"))
+```
+
+## Univariate Plots
+
+Histogram
+```{r}
+
+##you don't need to identify y because it is a freq, but will need to identify x axis 
+ggplot(weather_df, aes(x = tmax)) + 
+  geom_histogram()
+```
+
+```{r}
+ggplot(weather_df, aes(x = tmax)) + 
+  geom_histogram()
+  facet_grid(~name)
+```
+
+```{r}
+ggplot(weather_df, aes(x = tmax, fill = name)) + 
+  geom_histogram(position = "dodge", binwidth = 2)
+```
+
+Density Plot - a smooth histogram
+```{r}
+ggplot(weather_df, aes(x = tmax, fill = name)) + 
+  geom_density(alpha = .4, adjust = .5, color = "blue")
+```
+
+Boxplot 
+
+```{r}
+##without name 
+ggplot(weather_df, aes(y = tmax)) + 
+  geom_boxplot()
+```
+
+```{r}
+
+## with name 
+ggplot(weather_df, aes(x = name, y = tmax)) + 
+  geom_boxplot()
+```
+
+Violin Plot 
+
+```{r}
+
+## without color 
+
+## with color 
+ggplot(weather_df, aes(x = name, y = tmax)) + 
+  geom_violin(aes(fill = name), color = "blue", alpha = .5) + 
+  stat_summary(fun.y = median, geom = "point", color = "blue", size = 4)
+```
+
+```{r}
+
+## in class
+ggplot(weather_df, aes(x = tmax, y = name)) + 
+  geom_density_ridges()
+
+## Website 
+ggplot(weather_df, aes(x = tmax, y = name)) + 
+  geom_density_ridges(scale = .85)
+```
+
+```{r}
+weather_plot = ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) 
+
+ggsave("weather_plot.pdf", weather_plot, width = 8, height = 5)
 ```
 
