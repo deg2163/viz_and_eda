@@ -9,13 +9,12 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
 ```{r}
 library(tidyverse)
 library(ggridges)
 ```
 
-```{r setup, CACHE=TRUE}
+```{r data_import, CACHE=TRUE}
 library(rnoaa)
 weather_df = 
   rnoaa::meteo_pull_monitors(c("USW00094728", "USC00519397", "USS0023B17S"),
@@ -34,17 +33,22 @@ weather_df
 
 ## Start a plot 
 
+Blank Plot...
 ```{r}
+##this is just give you a graph that will show you what it will look like
 ggplot(weather_df, aes(x = tmin, y = tmax))
 ```
 
-Scatteplot 
+Scatteplot..
 ```{r}
+
+##geompoint allows you to take the data and create points out of it 
 ggplot(weather_df, aes(x = tmin, y = tmax)) + 
   geom_point()
 ```
 
 ```{r}
+##this plot will give you a plot that focuses only on Central Park 
 weather_df %>% 
   filter(name == "CentralPark_NY") %>% 
   ggplot(aes(x = tmin, y = tmax)) + 
@@ -52,15 +56,15 @@ weather_df %>%
 ```
 
 
-## In class
 ```{r}
+## allows you save your plot without using ggsave 
 weather_sp = 
-  ggplot(weather_df,es(x = tmin, y = tmax)) + 
+  ggplot(weather_df,aes(x = tmin, y = tmax)) + 
   geom_point()
 ```
 
 
-## Board 
+## Boring Plot
 ```{r}
 plot_weather = 
   weather_df %>%
@@ -80,22 +84,15 @@ ggplot(weather_df, aes(x = tmin, y = tmax)) +
 Add a geom
 ```{r}
 
-##Adds a smooth line through your data points, adding se 
+##geomsmooth() adds a smooth line through your data points, adding se = FALSE turns off the standard error bars which he recommends that we use. Adding an alpha makes the points clearer to see
 ggplot(weather_df, aes(x = tmin, y = tmax)) + 
-  geom_point(aes(color = name), alpha = .5) +
+  geom_point(aes(color = name), alpha = 0.4) +
   geom_smooth(se = FALSE)
 ```
 
 
 ```{r}
-## makes it a little easier to see by changing the alpha from .5 to .4 
-ggplot(weather_df, aes(x = tmin, y = tmax)) + 
-  geom_point(aes(color = name), alpha = .4) +
-  geom_smooth(se = FALSE)
-```
-
-```{r}
-##Aethetics map is for creating a smooth through each color 
+##Aethetics map is for creating a smooth curve with each color 
 ggplot(weather_df, aes(x = tmin, y = tmax, color = name)) + 
   geom_point(alpha = .4) +
   geom_smooth(se = FALSE)
@@ -103,22 +100,26 @@ ggplot(weather_df, aes(x = tmin, y = tmax, color = name)) +
 
 Facetting...
 ```{r}
-## Divide your plot against a nother vairable 
+## Divide your plot against another vairable, creating separtate plots for each variable  
 ggplot(weather_df, aes(x = tmin, y = tmax, color = name)) + 
   geom_point(alpha = .4) +
   geom_smooth(se = FALSE) + 
   facet_grid( ~ name)
 ```
 
-A more interesting plot
+A more interesting plot, adding by date 
 ```{r}
-## Boring one...
+## Boring one...added a geompoint
 ggplot(weather_df, aes(x = date, y = tmax)) + 
   geom_point()
 
 ## Adding color
 ggplot(weather_df, aes(x = date, y = tmax, color = name)) + 
   geom_point()
+
+## Adding a line instead
+ggplot(weather_df, aes(x = date, y = tmax, color = name)) + 
+  geom_line()
 
 ## Smooth, often not enough data to show and would not use 
 ggplot(weather_df, aes(x = date, y = tmax, color = name)) + 
@@ -130,13 +131,22 @@ ggplot(weather_df, aes(x = tmax, y = tmin)) +
 ```
 
 ```{r}
-## Allows you to do it by adding precipitation(?)
+## Allows you to do it by adding precipitation
 ggplot(weather_df, aes(x = date, y = tmax, color = name, size = prcp)) + 
   geom_point() + 
   geom_smooth(se = FALSE) + 
   facet_grid(~name)
 ```
-
+## Learning Assessment 
+```{r}
+weather_df %>% 
+  filter(name == "CentralPark_NY") %>% 
+  mutate(tmax_fahr = tmax * (9 / 5) + 32,
+         tmin_fahr = tmin * (9 / 5) + 32) %>% 
+  ggplot(aes(x = tmin_fahr, y = tmax_fahr)) +
+  geom_point(alpha = .5) + 
+  geom_smooth(method = "lm", se = FALSE)
+```
 
 ## Learning Assessment 
 ```{r}
@@ -149,9 +159,8 @@ ggplot(weather_df) + geom_point(aes(x = tmax, y = tmin, color = "blue"))
 
 ## Univariate Plots
 
-Histogram
+Histograms
 ```{r}
-
 ##you don't need to identify y because it is a freq, but will need to identify x axis 
 ggplot(weather_df, aes(x = tmax)) + 
   geom_histogram()
@@ -159,7 +168,7 @@ ggplot(weather_df, aes(x = tmax)) +
 
 ```{r}
 ggplot(weather_df, aes(x = tmax)) + 
-  geom_histogram()
+  geom_histogram() + 
   facet_grid(~name)
 ```
 
@@ -189,12 +198,12 @@ ggplot(weather_df, aes(x = name, y = tmax)) +
   geom_boxplot()
 ```
 
-Violin Plot 
-
+Violin Plot, maybe helpful in telling you that it is a bimodal 
 ```{r}
-
 ## without color 
-
+ggplot(weather_df, aes(x = name, y = tmax)) + 
+  geom_violin()
+              
 ## with color 
 ggplot(weather_df, aes(x = name, y = tmax)) + 
   geom_violin(aes(fill = name), color = "blue", alpha = .5) + 
@@ -202,7 +211,6 @@ ggplot(weather_df, aes(x = name, y = tmax)) +
 ```
 
 ```{r}
-
 ## in class
 ggplot(weather_df, aes(x = tmax, y = name)) + 
   geom_density_ridges()
@@ -212,6 +220,7 @@ ggplot(weather_df, aes(x = tmax, y = name)) +
   geom_density_ridges(scale = .85)
 ```
 
+## Saving Plots
 ```{r}
 weather_plot = ggplot(weather_df, aes(x = tmin, y = tmax)) + 
   geom_point(aes(color = name), alpha = .5) 
