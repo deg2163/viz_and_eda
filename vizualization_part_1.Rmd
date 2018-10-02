@@ -2,7 +2,7 @@
 title: "Vizualization Part 1"
 author: "Diana Ballesteros"
 date: "9/27/2018"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
