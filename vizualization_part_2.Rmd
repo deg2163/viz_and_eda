@@ -229,6 +229,25 @@ ggplot(waikiki, aes(x = date, y = tmax, color = name)) +
 ## Patchwork 
 
 ```{r}
+
+## You can also do the same thing by inserting facet_grid 
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) + 
+  labs(
+    title = "Temperature plot",
+    x = "Minimum daily temperature (C)",
+    y = "Maxiumum daily temperature (C)",
+    caption = "Data from the rnoaa package"
+  ) + 
+  viridis::scale_color_viridis(
+    name = "Location", 
+    discrete = TRUE
+  ) + 
+  theme_bw() + 
+  theme(legend.position = "bottom")
+```
+
+```{r}
 tmax_tmin_p = ggplot(weather_df, aes(x = tmax, y = tmin, color = name)) + 
   geom_point(alpha = .5) +
   theme(legend.position = "none")
@@ -245,5 +264,74 @@ tmax_date_p = ggplot(weather_df, aes(x = date, y = tmax, color = name)) +
   theme(legend.position = "bottom")
 
 (tmax_tmin_p + prcp_dens_p) / tmax_date_p
+```
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) + 
+  facet_grid(~name) + 
+  labs(
+    title = "Temperature plot",
+    x = "Minimum daily temperature (C)",
+    y = "Maxiumum daily temperature (C)",
+    caption = "Data from the rnoaa package"
+  ) + 
+  viridis::scale_color_viridis(
+    name = "Location", 
+    discrete = TRUE
+  ) + 
+  theme_bw() + 
+  theme(legend.position = "bottom")
+```
+
+## Data Manipulation 
+
+```{r}
+ggplot(weather_df, aes(x = name, y = tmax, fill = name)) + 
+  geom_violin()
+```
+
+```{r}
+## It now puts it a new order of my chosing 
+weather_df %>%
+  mutate(name = forcats::fct_relevel(name, c("Waikiki_HA", "CentralPark_NY", "Waterhole_WA"))) %>% 
+  ggplot(aes(x = name, y = tmax)) + 
+  geom_violin(aes(fill = name), color = "blue", alpha = .5) + 
+  theme(legend.position = "bottom")
+```
+
+
+```{r}
+weather_df %>%
+  mutate(name = forcats::fct_reorder(name, tmax)) %>% 
+  ggplot(aes(x = name, y = tmax)) + 
+  geom_violin(aes(fill = name), color = "blue", alpha = .5) + 
+  theme(legend.position = "bottom")
+```
+
+```{r}
+weather_df %>%
+  select(name, tmax, tmin) %>% 
+  gather(key = observation, value = temp, tmax:tmin) %>% 
+  ggplot(aes(x = temp, fill = observation)) +
+  geom_density(alpha = .5) + 
+  facet_grid(~name) + 
+  viridis::scale_fill_viridis(discrete = TRUE)
+```
+
+```{r}
+pulse_data = haven::read_sas("./data/public_pulse_data.sas7bdat") %>%
+  janitor::clean_names() %>%
+  gather(key = visit, value = bdi, bdi_score_bl:bdi_score_12m) %>%
+  separate(visit, into = c("remove_1", "remove_2", "visit"), sep = "_") %>%
+  select(id, visit, everything(), -starts_with("remove")) %>%
+  mutate(visit = replace(visit, visit == "bl", "00m"),
+         visit = factor(visit, levels = str_c(c("00", "01", "06", "12"), "m"))) %>%
+  arrange(id, visit)
+```
+
+```{r}
+ggplot(pulse_data, aes(x = visit, y = bdi)) + 
+  geom_boxplot()
 ```
 

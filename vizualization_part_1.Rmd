@@ -231,15 +231,19 @@ ggsave("weather_plot.pdf", weather_plot, width = 8, height = 5)
 ## Last Example (still need to review)  
 Mkase a bunch of plots!! 
 ```{r}
-ggpplot(weather_df, aes(y = prcp, x = name))
+## Boxplot is the best for this in compared to all these plots
+ggplot(weather_df, aes(y = prcp, x = name)) + 
   geom_boxplot()
 ```
 
 ```{r}
-ggplot(weather_df, aes(y = prcp, x = name))
+## changing the geometry to a violin plot, but this is not as helpful 
+ggplot(weather_df, aes(y = prcp, x = name, fill = name)) + 
+  geom_violin(alpha = 0.5)
 ```
 
 ```{r}
+## 
 weather_df %>% 
   filter(prcp < 100) %>% 
   ggplot(aes(x = prcp, fill = name)) + 

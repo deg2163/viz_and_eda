@@ -7,14 +7,14 @@ Diana Ballesteros
 library(tidyverse)
 ```
 
-    ## ── Attaching packages ───────────────────────────────────────── tidyverse 1.2.1 ──
+    ## ── Attaching packages ──────────────────────────────────────────────────────── tidyverse 1.2.1 ──
 
     ## ✔ ggplot2 3.0.0     ✔ purrr   0.2.5
     ## ✔ tibble  1.4.2     ✔ dplyr   0.7.6
     ## ✔ tidyr   0.8.1     ✔ stringr 1.3.1
     ## ✔ readr   1.1.1     ✔ forcats 0.3.0
 
-    ## ── Conflicts ──────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ── Conflicts ─────────────────────────────────────────────────────────── tidyverse_conflicts() ──
     ## ✖ dplyr::filter() masks stats::filter()
     ## ✖ dplyr::lag()    masks stats::lag()
 
@@ -417,3 +417,38 @@ ggsave("weather_plot.pdf", weather_plot, width = 8, height = 5)
 ```
 
     ## Warning: Removed 15 rows containing missing values (geom_point).
+
+Last Example (still need to review)
+-----------------------------------
+
+Mkase a bunch of plots!!
+
+``` r
+## Boxplot is the best for this in compared to all these plots
+ggplot(weather_df, aes(y = prcp, x = name)) + 
+  geom_boxplot()
+```
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_boxplot).
+
+![](vizualization_part_1_files/figure-markdown_github/unnamed-chunk-24-1.png)
+
+``` r
+## changing the geometry to a violin plot, but this is not as helpful 
+ggplot(weather_df, aes(y = prcp, x = name, fill = name)) + 
+  geom_violin(alpha = 0.5)
+```
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_ydensity).
+
+![](vizualization_part_1_files/figure-markdown_github/unnamed-chunk-25-1.png)
+
+``` r
+## 
+weather_df %>% 
+  filter(prcp < 100) %>% 
+  ggplot(aes(x = prcp, fill = name)) + 
+  geom_density(alpha = .5)
+```
+
+![](vizualization_part_1_files/figure-markdown_github/unnamed-chunk-26-1.png)
