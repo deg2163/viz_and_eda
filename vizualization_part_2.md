@@ -20,14 +20,14 @@ devtools::install_github("thomasp85/patchwork")
 library(tidyverse)
 ```
 
-    ## ── Attaching packages ───────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──
+    ## ── Attaching packages ──────────────────────────────────────────────────────── tidyverse 1.2.1 ──
 
     ## ✔ ggplot2 3.0.0     ✔ purrr   0.2.5
     ## ✔ tibble  1.4.2     ✔ dplyr   0.7.6
     ## ✔ tidyr   0.8.1     ✔ stringr 1.3.1
     ## ✔ readr   1.1.1     ✔ forcats 0.3.0
 
-    ## ── Conflicts ──────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ── Conflicts ─────────────────────────────────────────────────────────── tidyverse_conflicts() ──
     ## ✖ dplyr::filter() masks stats::filter()
     ## ✖ dplyr::lag()    masks stats::lag()
 
@@ -45,6 +45,8 @@ library(ggridges)
 ``` r
 library(patchwork)
 ```
+
+Data import.
 
 ``` r
 weather_df = 
@@ -108,7 +110,7 @@ ggplot(weather_df, aes(x = tmin, y = tmax)) +
 
 <img src="vizualization_part_2_files/figure-markdown_github/unnamed-chunk-5-1.png" width="90%" />
 
-Tick marks and labels
+Tick marks and labels... scale\_x\_continuous allows you to do many things to the aesthetics of the plot. Breaks allows you to add tick marks in certain places
 
 ``` r
 ggplot(weather_df, aes(x = tmin, y = tmax)) + 
@@ -130,6 +132,10 @@ ggplot(weather_df, aes(x = tmin, y = tmax)) +
 trans = allows you to transform your values
 
 ``` r
+## limits allows you to put a limit on your plot. Think of like a range. 
+## You can also add the scale_y_continuos to the y 
+## position = "right" allows you to move the tick marks to the right. 
+## trans = "sqrt" allows you to transformt the data 
 ggplot(weather_df, aes(x = tmin, y = tmax)) + 
   geom_point(aes(color = name), alpha = .5) + 
   labs(
@@ -156,7 +162,7 @@ ggplot(weather_df, aes(x = tmin, y = tmax)) +
 Colors and Themes
 -----------------
 
-scale\_color\_discrete is the same as scale\_color\_hue name = "location" allows you to change the name of the title of the legend key
+Adjsut color... scale\_color\_discrete is the same as scale\_color\_hue name = "location" allows you to change the name of the title of the legend key h = is the hue l = luminosit
 
 ``` r
 ggplot(weather_df, aes(x = tmin, y = tmax)) + 
@@ -168,14 +174,15 @@ ggplot(weather_df, aes(x = tmin, y = tmax)) +
     caption = "Data from the rnoaa package"
   ) + 
   scale_color_hue(name = "Location", 
-                  h = c(100, 300))
+                  h = c(100, 350), 
+                  l = 75)
 ```
 
     ## Warning: Removed 15 rows containing missing values (geom_point).
 
 <img src="vizualization_part_2_files/figure-markdown_github/unnamed-chunk-8-1.png" width="90%" />
 
-Viridis by default, viridus will do a continous variable
+Viridis by default, viridus will do a continous variable, so need to tell it is discrete
 
 ``` r
 ggplot(weather_df, aes(x = tmin, y = tmax)) + 
@@ -215,6 +222,9 @@ ggplot(weather_df, aes(x = tmin, y = tmax)) +
 
 <img src="vizualization_part_2_files/figure-markdown_github/unnamed-chunk-10-1.png" width="90%" />
 
+Theme
+-----
+
 ``` r
 ggplot(weather_df, aes(x = tmin, y = tmax)) + 
   geom_point(aes(color = name), alpha = .5) + 
@@ -237,6 +247,7 @@ ggplot(weather_df, aes(x = tmin, y = tmax)) +
 <img src="vizualization_part_2_files/figure-markdown_github/unnamed-chunk-11-1.png" width="90%" />
 
 ``` r
+## Add the legend to the bottom, where you add the theme - "bottom" matters. 
 ggplot(weather_df, aes(x = tmin, y = tmax)) + 
   geom_point(aes(color = name), alpha = .5) + 
   labs(
@@ -330,10 +341,33 @@ ggplot(waikiki, aes(x = date, y = tmax, color = name)) +
 
 <img src="vizualization_part_2_files/figure-markdown_github/unnamed-chunk-15-1.png" width="90%" />
 
+``` r
+## You can also do the same thing by inserting facet_grid 
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) + 
+  labs(
+    title = "Temperature plot",
+    x = "Minimum daily temperature (C)",
+    y = "Maxiumum daily temperature (C)",
+    caption = "Data from the rnoaa package"
+  ) + 
+  viridis::scale_color_viridis(
+    name = "Location", 
+    discrete = TRUE
+  ) + 
+  theme_bw() + 
+  theme(legend.position = "bottom")
+```
+
+    ## Warning: Removed 15 rows containing missing values (geom_point).
+
+<img src="vizualization_part_2_files/figure-markdown_github/unnamed-chunk-16-1.png" width="90%" />
+
 Patchwork
 ---------
 
 ``` r
+library(patchwork)
 tmax_tmin_p = ggplot(weather_df, aes(x = tmax, y = tmin, color = name)) + 
   geom_point(alpha = .5) +
   theme(legend.position = "none")
@@ -349,6 +383,7 @@ tmax_date_p = ggplot(weather_df, aes(x = date, y = tmax, color = name)) +
   geom_smooth(se = FALSE) + 
   theme(legend.position = "bottom")
 
+## Doing this will combine all of yourplots that are fundamentally different
 (tmax_tmin_p + prcp_dens_p) / tmax_date_p
 ```
 
@@ -360,4 +395,86 @@ tmax_date_p = ggplot(weather_df, aes(x = date, y = tmax, color = name)) +
 
     ## Warning: Removed 3 rows containing missing values (geom_point).
 
-<img src="vizualization_part_2_files/figure-markdown_github/unnamed-chunk-16-1.png" width="90%" />
+<img src="vizualization_part_2_files/figure-markdown_github/unnamed-chunk-17-1.png" width="90%" />
+
+``` r
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) + 
+  facet_grid(~name) + 
+  labs(
+    title = "Temperature plot",
+    x = "Minimum daily temperature (C)",
+    y = "Maxiumum daily temperature (C)",
+    caption = "Data from the rnoaa package"
+  ) + 
+  viridis::scale_color_viridis(
+    name = "Location", 
+    discrete = TRUE
+  ) + 
+  theme_bw() + 
+  theme(legend.position = "bottom")
+```
+
+    ## Warning: Removed 15 rows containing missing values (geom_point).
+
+<img src="vizualization_part_2_files/figure-markdown_github/unnamed-chunk-18-1.png" width="90%" />
+
+Data Manipulation
+-----------------
+
+``` r
+ggplot(weather_df, aes(x = name, y = tmax, fill = name)) + 
+  geom_violin()
+```
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_ydensity).
+
+<img src="vizualization_part_2_files/figure-markdown_github/unnamed-chunk-19-1.png" width="90%" />
+
+``` r
+## It now puts it a new order of my chosing; allows you to rearrange the graphs in the order you like 
+weather_df %>%
+  mutate(name = forcats::fct_relevel(name, c("Waikiki_HA", "CentralPark_NY", "Waterhole_WA"))) %>% 
+  ggplot(aes(x = name, y = tmax)) + 
+  geom_violin(aes(fill = name), color = "blue", alpha = .5) + 
+  theme(legend.position = "bottom")
+```
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_ydensity).
+
+<img src="vizualization_part_2_files/figure-markdown_github/unnamed-chunk-20-1.png" width="90%" />
+
+``` r
+## forcats::fct_reorder allows you rearrange according to a new factor of your choosing
+weather_df %>%
+  mutate(name = forcats::fct_reorder(name, tmax)) %>% 
+  ggplot(aes(x = name, y = tmax)) + 
+  geom_violin(aes(fill = name), color = "blue", alpha = .5) + 
+  theme(legend.position = "bottom")
+```
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_ydensity).
+
+<img src="vizualization_part_2_files/figure-markdown_github/unnamed-chunk-21-1.png" width="90%" />
+
+Advanced tidying...
+
+``` r
+## Data manipulation vs. Data tidying at the same time 
+weather_df %>%
+  select(name, tmax, tmin) %>% 
+  gather(key = observation, value = temp, tmax:tmin) %>% 
+  ggplot(aes(x = temp, fill = observation)) +
+  geom_density(alpha = .5) + 
+  facet_grid(~name) + 
+  viridis::scale_fill_viridis(discrete = TRUE)
+```
+
+    ## Warning: Removed 18 rows containing non-finite values (stat_density).
+
+<img src="vizualization_part_2_files/figure-markdown_github/unnamed-chunk-22-1.png" width="90%" />
+
+can't load becayse I don't have the data set in the data folder...
+------------------------------------------------------------------
+
+pulse\_data = haven::read\_sas("./data/public\_pulse\_data.sas7bdat") %&gt;% janitor::clean\_names() %&gt;% gather(key = visit, value = bdi, bdi\_score\_bl:bdi\_score\_12m) %&gt;% separate(visit, into = c("remove\_1", "remove\_2", "visit"), sep = "\_") %&gt;% select(id, visit, everything(), -starts\_with("remove")) %&gt;% mutate(visit = replace(visit, visit == "bl", "00m"), visit = factor(visit, levels = str\_c(c("00", "01", "06", "12"), "m"))) %&gt;% arrange(id, visit)

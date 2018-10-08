@@ -22,7 +22,7 @@ library(ggridges)
 library(patchwork)
 ```
 
-
+Data import. 
 ```{r}
 weather_df = 
   rnoaa::meteo_pull_monitors(c("USW00094728", "USC00519397", "USS0023B17S"),
@@ -60,7 +60,9 @@ ggplot(weather_df, aes(x = tmin, y = tmax)) +
   ) 
 ```
 
-Tick marks and labels
+Tick marks and labels...
+scale_x_continuous allows you to do many things to the aesthetics of the plot. 
+Breaks allows you to add tick marks in certain places 
 ```{r}
 ggplot(weather_df, aes(x = tmin, y = tmax)) + 
   geom_point(aes(color = name), alpha = .5) + 
@@ -76,6 +78,11 @@ ggplot(weather_df, aes(x = tmin, y = tmax)) +
 
 trans = allows you to transform your values 
 ```{r}
+
+## limits allows you to put a limit on your plot. Think of like a range. 
+## You can also add the scale_y_continuos to the y 
+## position = "right" allows you to move the tick marks to the right. 
+## trans = "sqrt" allows you to transformt the data 
 ggplot(weather_df, aes(x = tmin, y = tmax)) + 
   geom_point(aes(color = name), alpha = .5) + 
   labs(
@@ -92,8 +99,11 @@ ggplot(weather_df, aes(x = tmin, y = tmax)) +
 ```
 
 ## Colors and Themes
+Adjsut color...
 scale_color_discrete is the same as scale_color_hue
 name = "location" allows you to change the name of the title of the legend key 
+h = is the hue 
+l = luminosit 
 ```{r}
 ggplot(weather_df, aes(x = tmin, y = tmax)) + 
   geom_point(aes(color = name), alpha = .5) + 
@@ -104,11 +114,12 @@ ggplot(weather_df, aes(x = tmin, y = tmax)) +
     caption = "Data from the rnoaa package"
   ) + 
   scale_color_hue(name = "Location", 
-                  h = c(100, 300))
+                  h = c(100, 350), 
+                  l = 75)
 ```
 
 Viridis
-by default, viridus will do a continous variable 
+by default, viridus will do a continous variable, so need to tell it is discrete
 ```{r}
 ggplot(weather_df, aes(x = tmin, y = tmax)) + 
   geom_point(aes(color = name), alpha = .5) + 
@@ -139,6 +150,7 @@ ggplot(weather_df, aes(x = tmin, y = tmax)) +
   theme(legend.position = "bottom")
 ```
 
+## Theme 
 ```{r}
 ggplot(weather_df, aes(x = tmin, y = tmax)) + 
   geom_point(aes(color = name), alpha = .5) + 
@@ -157,6 +169,7 @@ ggplot(weather_df, aes(x = tmin, y = tmax)) +
 ```
 
 ```{r}
+## Add the legend to the bottom, where you add the theme - "bottom" matters. 
 ggplot(weather_df, aes(x = tmin, y = tmax)) + 
   geom_point(aes(color = name), alpha = .5) + 
   labs(
@@ -225,11 +238,7 @@ ggplot(waikiki, aes(x = date, y = tmax, color = name)) +
   geom_line(data = central_park)
 ```
 
-
-## Patchwork 
-
 ```{r}
-
 ## You can also do the same thing by inserting facet_grid 
 ggplot(weather_df, aes(x = tmin, y = tmax)) + 
   geom_point(aes(color = name), alpha = .5) + 
@@ -247,7 +256,9 @@ ggplot(weather_df, aes(x = tmin, y = tmax)) +
   theme(legend.position = "bottom")
 ```
 
+## Patchwork 
 ```{r}
+library(patchwork)
 tmax_tmin_p = ggplot(weather_df, aes(x = tmax, y = tmin, color = name)) + 
   geom_point(alpha = .5) +
   theme(legend.position = "none")
@@ -263,6 +274,7 @@ tmax_date_p = ggplot(weather_df, aes(x = date, y = tmax, color = name)) +
   geom_smooth(se = FALSE) + 
   theme(legend.position = "bottom")
 
+## Doing this will combine all of yourplots that are fundamentally different
 (tmax_tmin_p + prcp_dens_p) / tmax_date_p
 ```
 
@@ -292,7 +304,7 @@ ggplot(weather_df, aes(x = name, y = tmax, fill = name)) +
 ```
 
 ```{r}
-## It now puts it a new order of my chosing 
+## It now puts it a new order of my chosing; allows you to rearrange the graphs in the order you like 
 weather_df %>%
   mutate(name = forcats::fct_relevel(name, c("Waikiki_HA", "CentralPark_NY", "Waterhole_WA"))) %>% 
   ggplot(aes(x = name, y = tmax)) + 
@@ -302,6 +314,8 @@ weather_df %>%
 
 
 ```{r}
+
+## forcats::fct_reorder allows you rearrange according to a new factor of your choosing
 weather_df %>%
   mutate(name = forcats::fct_reorder(name, tmax)) %>% 
   ggplot(aes(x = name, y = tmax)) + 
@@ -309,7 +323,10 @@ weather_df %>%
   theme(legend.position = "bottom")
 ```
 
+Advanced tidying...
 ```{r}
+
+## Data manipulation vs. Data tidying at the same time 
 weather_df %>%
   select(name, tmax, tmin) %>% 
   gather(key = observation, value = temp, tmax:tmin) %>% 
@@ -319,7 +336,7 @@ weather_df %>%
   viridis::scale_fill_viridis(discrete = TRUE)
 ```
 
-```{r}
+## can't load becayse I don't have the data set in the data folder...
 pulse_data = haven::read_sas("./data/public_pulse_data.sas7bdat") %>%
   janitor::clean_names() %>%
   gather(key = visit, value = bdi, bdi_score_bl:bdi_score_12m) %>%
@@ -328,10 +345,4 @@ pulse_data = haven::read_sas("./data/public_pulse_data.sas7bdat") %>%
   mutate(visit = replace(visit, visit == "bl", "00m"),
          visit = factor(visit, levels = str_c(c("00", "01", "06", "12"), "m"))) %>%
   arrange(id, visit)
-```
-
-```{r}
-ggplot(pulse_data, aes(x = visit, y = bdi)) + 
-  geom_boxplot()
-```
-
+  
