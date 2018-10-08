@@ -12,6 +12,7 @@ knitr::opts_chunk$set(
   out.width = "90%"
 )
 
+
 devtools::install_github("thomasp85/patchwork")
 
 ```
@@ -21,6 +22,9 @@ library(tidyverse)
 ```
 
 ```{r}
+
+## This will round down each obervation down to the 1st of the month
+## month = lubridate::floor_date(date, unit = "month"))
 weather_df = 
   rnoaa::meteo_pull_monitors(c("USW00094728", "USC00519397", "USS0023B17S"),
                       var = c("PRCP", "TMIN", "TMAX"), 
@@ -37,16 +41,25 @@ weather_df =
 ```
 
 
-## Start Groupping 
+## Start Grouping 
 ```{r}
+
+## You can group by day, manth, or both 
 weather_df %>% 
   group_by(name, month)
 ```
 
 ```{r}
+## Adding sumarrize. In the middle you add what you want to rename it as
+
 weather_df %>%
   group_by(month) %>%
-  summarize(n = n())
+  summarize(number = n())
+
+## Group by the name 
+weather_df %>%
+  group_by(name) %>%
+  summarize(number = n())
 ```
 
 ## Does the same thing!!!
@@ -57,21 +70,42 @@ weather_df %>%
 
 ## Grouped Summaries 
 ```{r}
+
+## Example in class 
 weather_df %>%
-  group_by(month) %>%
+  group_by(name, month) %>%
+  summarize(number = n(),
+            mean_tmax = mean(tmax))
+
+## Remove missing values
+weather_df %>%
+  group_by(name, month) %>%
+  summarize(number = n(),
+            mean_tmax = mean(tmax, na.rm = TRUE))
+
+weather_df %>%
+  group_by(name, month) %>%
   summarize(n_obs = n(),
             n_days = n_distinct(date))
 ```
 
-
+This is still a tibble! 
 ```{r}
-##na.rm takes away the missing data by default 
+## na.rm takes away the missing data by default and you can also look at median, st dev
 weather_df %>%
   group_by(month) %>%
   summarize(mean_tmax = mean(tmax),
             mean_prec = mean(prcp, na.rm = TRUE),
             median_tmax = median(tmax),
-            sd_tmax = sd(tmax))
+            sd_tmax = sd(tmax)) %>% 
+  ggplot(aes(x = month, y = mean_tmax, color = name)) + 
+  geom_point()
+
+## Plot two tables at once...
+## another way 
+ggplot(weather_df, aes(x = month, y = mean_tmax, color = name)) + 
+  geom_point(alpha = .5) + 
+  geom_line(data = month, aes(x = month, y = mean_tmax))
 ```
 
 ```{r}
@@ -83,6 +117,7 @@ weather_df %>%
     theme(legend.position = "bottom")
 ```
 
+Tidy is not always best for humans...
 ```{r}
 weather_df %>%
   group_by(name, month) %>%
@@ -95,16 +130,29 @@ weather_df %>%
 ## mutate is going to respect the grouping 
 weather_df %>%
   group_by(name) %>%
+  mutate(mean_tmax = mean(tmax, na.rm = TRUE))
+```
+
+More interesting example...
+```{r}
+weather_df %>%
+  group_by(name) %>%
   mutate(centered_tmax = tmax - mean(tmax)) %>% 
   ggplot(aes(x = date, y = centered_tmax, color = name)) + 
     geom_point() 
 ```
 
 ## Window Functions
+
+Use ranks
 ```{r}
+
+## in class 
+
 weather_df %>%
   group_by(name, month) %>%
-  mutate(temp_ranking = min_rank(tmax))
+  mutate(tmax_rank = min_rank(desc(tmax))) %>% 
+  filter(tmax_rank < 2)
 ```
 
 ```{r}
@@ -119,13 +167,20 @@ weather_df %>%
   filter(min_rank(desc(tmax)) < 4)
 ```
 
+Use lags...
 ```{r}
+
+## When using the lag fxn, make sure visits or dates are arranged sensibly
 weather_df %>%
   group_by(name) %>%
   mutate(temp_change = tmax - lag(tmax))
 ```
 
+## How neat is this? 
 ```{r}
+
+## How much did the temp change from one day to the next 
+
 weather_df %>%
   group_by(name) %>%
   mutate(temp_change = tmax - lag(tmax)) %>%
