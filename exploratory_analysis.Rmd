@@ -188,3 +188,11 @@ weather_df %>%
             temp_change_max = max(temp_change, na.rm = TRUE))
 ```
 
+## Don't ever use the table function 
+```{r}
+weather_df %>% 
+  pull(name) %>% 
+  table %>% names()
+  
+```
+
